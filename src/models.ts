@@ -1,0 +1,33 @@
+export type Model = {
+  version: string;
+  url: string;
+  name: string;
+};
+
+export const models: Model[] = [
+  {
+    version: "db21e45d3f7023abc2a46ee38a23973f6dce16bb082a930b0c49861f96d1e5bf",
+    url: "https://replicate.com/stability-ai/stable-diffusion",
+    name: "stable-diffusion",
+  },
+  {
+    version: "db21e45d3f7023abc2a46ee38a23973f6dce16bb082a930b0c49861f96d1e5bf",
+    url: "https://replicate.com/stability-ai/stable-diffusion",
+    name: "stable-diffusion-high-resolution",
+  },
+  {
+    version: "a42692c54c0f407f803a0a8a9066160976baedb77c91171a01730f9b0d7beeff",
+    url: "https://replicate.com/tstramer/material-diffusion",
+    name: "material-diffusion",
+  },
+  {
+    version: "9936c2001faa2194a261c01381f90e65261879985476014a0a37a334593a05eb",
+    url: "https://replicate.com/prompthero/openjourney",
+    name: "openjourney",
+  },
+  {
+    version: "28cea91bdfced0e2dc7fda466cc0a46501c0edc84905b2120ea02e0707b967fd",
+    url: "https://replicate.com/22-hours/vintedois-diffusion/versions/28cea91bdfced0e2dc7fda466cc0a46501c0edc84905b2120ea02e0707b967fd",
+    name: "vintedois-diffusion",
+  },
+];
