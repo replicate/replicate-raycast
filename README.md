@@ -1,3 +1,7 @@
-# Replicate
+# Setup
+todo
 
-Run replicate models
+`npm i`
+`npm run dev`
+
+Open Raycast and run Replicate extension
