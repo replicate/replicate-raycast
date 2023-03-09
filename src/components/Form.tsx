@@ -17,7 +17,7 @@ type Values = {
 export default function RenderForm(props: { token: string; modelName: string }) {
   const [isLoading, setIsLoading] = useState(false);
   const [options, setOptions] = useState([]);
-  const [enumMap, setEnumMap] = useState({});
+  const [modelName, setModelName] = useState(props.modelName);
 
   async function handler(values: any) {
     const model = await getModelByName(values.dropdown);
@@ -80,13 +80,10 @@ export default function RenderForm(props: { token: string; modelName: string }) 
   const parseModelInputs = (model: any) => {
     const options = model.latest_version.openapi_schema.components.schemas.Input.properties;
 
-    model.latest_version.openapi_schema.components.schemas;
-
     // convert options to array
     const optionsArray = Object.keys(options).map((key) => {
       const newOptions = options;
       if ("allOf" in options[key]) {
-        setEnumMap({ ...enumMap, [key]: model.latest_version.openapi_schema.components.schemas });
         newOptions[key]["enums"] = model.latest_version.openapi_schema.components.schemas;
       }
       return { name: key, values: newOptions[key] };
@@ -155,6 +152,7 @@ export default function RenderForm(props: { token: string; modelName: string }) 
     getModelByName(modelName).then((model) => {
       const options = parseModelInputs(model);
       setOptions(options.sort((a, b) => (a.values["x-order"] > b.values["x-order"] ? 1 : -1)));
+      setModelName(modelName);
     });
   }
 
@@ -181,7 +179,7 @@ export default function RenderForm(props: { token: string; modelName: string }) 
       <Form.Separator />
       {options.map((option) => {
         return option.values.type == "string" || "integer" || "number" ? (
-          RenderFormInput({ option: option })
+          RenderFormInput({ option: option, modelName: modelName })
         ) : (
           <Form.Description key={option.name} text={option.name} />
         );
@@ -190,11 +188,12 @@ export default function RenderForm(props: { token: string; modelName: string }) 
   );
 }
 
-function RenderFormInput(props: { option: any }) {
+function RenderFormInput(props: { option: any; modelName: string }) {
   function getEnum(optionName: string) {
-    console.log(Object.entries(props.option.values.enums).filter((entry) => entry[0] === optionName)[0][1].enum);
     return Object.entries(props.option.values.enums).filter((entry) => entry[0] === optionName)[0][1].enum;
   }
+
+  console.log("Name", props.modelName);
 
   function toString(value: any) {
     if (value == null) {
@@ -206,18 +205,25 @@ function RenderFormInput(props: { option: any }) {
 
   return "allOf" in props.option.values ? (
     <>
-      <Form.Description key={`description-${props.option.name}`} text={props.option.name} />
-      <Form.Dropdown id={props.option.name} defaultValue={toString(props.option.values.default)}>
+      <Form.Description key={`description-${props.option.name}-${props.modelName}`} text={props.option.name} />
+      <Form.Dropdown
+        id={`${props.option.name}-${props.modelName}`}
+        defaultValue={toString(props.option.values.default)}
+      >
         {getEnum(props.option.name).map((value) => (
-          <Form.Dropdown.Item key={`${props.option.name}-${value}`} value={toString(value)} title={toString(value)} />
+          <Form.Dropdown.Item
+            key={`${props.option.name}-${value}-${props.modelName}`}
+            value={toString(value)}
+            title={toString(value)}
+          />
         ))}
       </Form.Dropdown>
     </>
   ) : (
     <>
-      <Form.Description key={props.option.name} text={props.option.name} />
+      <Form.Description key={`${props.option.name}-description-${props.modelName}`} text={props.option.name} />
       <Form.TextField
-        id={props.option.name}
+        id={`${props.option.name}-description-${props.modelName}`}
         defaultValue={toString(props.option.values.default)}
         info={props.option.values.description}
       />
