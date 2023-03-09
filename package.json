@@ -31,6 +31,7 @@
     "@raycast/api": "^1.48.7",
     "delay": "^5.0.0",
     "node-fetch": "^3.3.0",
+    "open": "^8.4.2",
     "open-graph-scraper": "^5.1.1",
     "replicate": "^0.4.0"
   },
