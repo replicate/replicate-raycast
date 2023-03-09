@@ -3,6 +3,7 @@ import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
 import delay from "delay";
 import { models, Model } from "../models";
+import open from "open";
 
 type Values = {
   textfield: string;
@@ -16,10 +17,31 @@ type Values = {
 export default function RenderForm(props: { token: string; modelName: string }) {
   const [isLoading, setIsLoading] = useState(false);
   const [options, setOptions] = useState([]);
+  const [enumMap, setEnumMap] = useState({});
 
   async function handler(values: any) {
     const model = await getModelByName(values.dropdown);
-    console.log(values);
+
+    // filter out empty values
+    values = Object.fromEntries(Object.entries(values).filter(([_, v]) => v));
+
+    for (const entry of Object.entries(values)) {
+      console.log(entry);
+      const option = options.filter((option) => option.name === entry[0])[0];
+
+      if (option && option.values && (option.values.type === "number" || option.values.type === "integer")) {
+        console.log(option.values.type);
+        if (option.values.type === "integer") {
+          values[entry[0]] = parseInt(entry[1]);
+        }
+
+        if (option.values.type === "number") {
+          values[entry[0]] = parseFloat(entry[1]);
+        }
+      }
+    }
+
+    console.log("Submission: ", values);
 
     const response = await fetch("https://api.replicate.com/v1/predictions", {
       method: "POST",
@@ -58,14 +80,19 @@ export default function RenderForm(props: { token: string; modelName: string }) 
   const parseModelInputs = (model: any) => {
     const options = model.latest_version.openapi_schema.components.schemas.Input.properties;
 
+    model.latest_version.openapi_schema.components.schemas;
+
     // convert options to array
     const optionsArray = Object.keys(options).map((key) => {
-      console.log(model.latest_version.openapi_schema.components);
+      const newOptions = options;
       if ("allOf" in options[key]) {
-        options[key]["enums"] = model.latest_version.openapi_schema.components.schemas[key].enum;
+        setEnumMap({ ...enumMap, [key]: model.latest_version.openapi_schema.components.schemas });
+        newOptions[key]["enums"] = model.latest_version.openapi_schema.components.schemas;
       }
-      return { name: key, values: options[key] };
+      return { name: key, values: newOptions[key] };
     });
+
+    console.log("options now: ", optionsArray);
 
     return optionsArray;
   };
@@ -87,8 +114,20 @@ export default function RenderForm(props: { token: string; modelName: string }) 
         },
       });
       prediction = await response.json();
-      if (response.status !== 200) {
+
+      if (response.status !== 200 || prediction.status == "failed") {
         console.log(response);
+        showToast({
+          style: Toast.Style.Failure,
+          title: "Error",
+          message: `Something went wrong`,
+          primaryAction: {
+            title: "View Prediction on Replicate",
+            onAction: () => {
+              open(`https://replicate.com/p/${prediction.id}`);
+            },
+          },
+        });
         return;
       }
       console.log(prediction.logs);
@@ -152,7 +191,11 @@ export default function RenderForm(props: { token: string; modelName: string }) 
 }
 
 function RenderFormInput(props: { option: any }) {
-  console.log(props.option.values);
+  function getEnum(optionName: string) {
+    console.log(Object.entries(props.option.values.enums).filter((entry) => entry[0] === optionName)[0][1].enum);
+    return Object.entries(props.option.values.enums).filter((entry) => entry[0] === optionName)[0][1].enum;
+  }
+
   function toString(value: any) {
     if (value == null) {
       return "";
@@ -160,11 +203,12 @@ function RenderFormInput(props: { option: any }) {
       return value.toString();
     }
   }
+
   return "allOf" in props.option.values ? (
     <>
       <Form.Description key={`description-${props.option.name}`} text={props.option.name} />
-      <Form.Dropdown id={props.option.name}>
-        {props.option.values.enums.map((value) => (
+      <Form.Dropdown id={props.option.name} defaultValue={toString(props.option.values.default)}>
+        {getEnum(props.option.name).map((value) => (
           <Form.Dropdown.Item key={`${props.option.name}-${value}`} value={toString(value)} title={toString(value)} />
         ))}
       </Form.Dropdown>
