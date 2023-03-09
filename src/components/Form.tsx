@@ -16,10 +16,10 @@ type Values = {
 export default function RenderForm(props: { token: string; modelName: string }) {
   const [isLoading, setIsLoading] = useState(false);
   const [options, setOptions] = useState([]);
-  const [enumMap, setEnumMap] = useState({});
 
   async function handler(values: any) {
     const model = await getModelByName(values.dropdown);
+    console.log(values);
 
     const response = await fetch("https://api.replicate.com/v1/predictions", {
       method: "POST",
@@ -60,11 +60,9 @@ export default function RenderForm(props: { token: string; modelName: string }) 
 
     // convert options to array
     const optionsArray = Object.keys(options).map((key) => {
+      console.log(model.latest_version.openapi_schema.components);
       if ("allOf" in options[key]) {
-        setEnumMap((enumMap) => ({
-          ...enumMap,
-          [key]: model.latest_version.openapi_schema.components.schemas[key].enum,
-        }));
+        options[key]["enums"] = model.latest_version.openapi_schema.components.schemas[key].enum;
       }
       return { name: key, values: options[key] };
     });
@@ -144,7 +142,7 @@ export default function RenderForm(props: { token: string; modelName: string }) 
       <Form.Separator />
       {options.map((option) => {
         return option.values.type == "string" || "integer" || "number" ? (
-          RenderFormInput({ option: option, enums: enumMap[option.name] })
+          RenderFormInput({ option: option })
         ) : (
           <Form.Description key={option.name} text={option.name} />
         );
@@ -153,7 +151,8 @@ export default function RenderForm(props: { token: string; modelName: string }) 
   );
 }
 
-function RenderFormInput(props: { option: any; enums: [string] }) {
+function RenderFormInput(props: { option: any }) {
+  console.log(props.option.values);
   function toString(value: any) {
     if (value == null) {
       return "";
@@ -161,11 +160,11 @@ function RenderFormInput(props: { option: any; enums: [string] }) {
       return value.toString();
     }
   }
-  return "allOf" in props.option.values && props.enums ? (
+  return "allOf" in props.option.values ? (
     <>
       <Form.Description key={`description-${props.option.name}`} text={props.option.name} />
       <Form.Dropdown id={props.option.name}>
-        {props.enums.map((value) => (
+        {props.option.values.enums.map((value) => (
           <Form.Dropdown.Item key={`${props.option.name}-${value}`} value={toString(value)} title={toString(value)} />
         ))}
       </Form.Dropdown>
@@ -173,7 +172,11 @@ function RenderFormInput(props: { option: any; enums: [string] }) {
   ) : (
     <>
       <Form.Description key={props.option.name} text={props.option.name} />
-      <Form.TextField id={props.option.name} defaultValue={toString(props.option.values.default)} />
+      <Form.TextField
+        id={props.option.name}
+        defaultValue={toString(props.option.values.default)}
+        info={props.option.values.description}
+      />
     </>
   );
 }
