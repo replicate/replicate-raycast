@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
 import fetch from "node-fetch";
 import delay from "delay";
-import { models, Model } from "./models";
+import { models, Model } from "../models";
 
 type Values = {
   textfield: string;
