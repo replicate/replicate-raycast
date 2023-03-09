@@ -20,13 +20,15 @@ export default function RenderForm(props: { token: string; modelName: string }) 
   const [modelName, setModelName] = useState(props.modelName);
 
   async function handler(values: any) {
-    const model = await getModelByName(values.dropdown);
+    const model = await getModelByName(modelName);
 
     // filter out empty values
     values = Object.fromEntries(Object.entries(values).filter(([_, v]) => v));
+    values = Object.fromEntries(
+      Object.entries(values).map(([k, v]) => [k.replace(model.name, "").replace("-", ""), v])
+    );
 
     for (const entry of Object.entries(values)) {
-      console.log(entry);
       const option = options.filter((option) => option.name === entry[0])[0];
 
       if (option && option.values && (option.values.type === "number" || option.values.type === "integer")) {
@@ -207,12 +209,12 @@ function RenderFormInput(props: { option: any; modelName: string }) {
     <>
       <Form.Description key={`description-${props.option.name}-${props.modelName}`} text={props.option.name} />
       <Form.Dropdown
-        id={`${props.option.name}-${props.modelName}`}
+        id={`${props.modelName}-${props.option.name}`}
         defaultValue={toString(props.option.values.default)}
       >
         {getEnum(props.option.name).map((value) => (
           <Form.Dropdown.Item
-            key={`${props.option.name}-${value}-${props.modelName}`}
+            key={`${props.option.name}-${props.option.value}`}
             value={toString(value)}
             title={toString(value)}
           />
@@ -221,9 +223,9 @@ function RenderFormInput(props: { option: any; modelName: string }) {
     </>
   ) : (
     <>
-      <Form.Description key={`${props.option.name}-description-${props.modelName}`} text={props.option.name} />
+      <Form.Description key={`description-${props.option.name}`} text={props.option.name} />
       <Form.TextField
-        id={`${props.option.name}-description-${props.modelName}`}
+        id={`${props.modelName}-${props.option.name}`}
         defaultValue={toString(props.option.values.default)}
         info={props.option.values.description}
       />
