@@ -195,8 +195,6 @@ function RenderFormInput(props: { option: any; modelName: string }) {
     return Object.entries(props.option.values.enums).filter((entry) => entry[0] === optionName)[0][1].enum;
   }
 
-  console.log("Name", props.modelName);
-
   function toString(value: any) {
     if (value == null) {
       return "";
@@ -212,12 +210,8 @@ function RenderFormInput(props: { option: any; modelName: string }) {
         id={`${props.modelName}-${props.option.name}`}
         defaultValue={toString(props.option.values.default)}
       >
-        {getEnum(props.option.name).map((value) => (
-          <Form.Dropdown.Item
-            key={`${props.option.name}-${props.option.value}`}
-            value={toString(value)}
-            title={toString(value)}
-          />
+        {getEnum(props.option.name).map((value, i) => (
+          <Form.Dropdown.Item key={`${props.option.name}-${i}`} value={toString(value)} title={toString(value)} />
         ))}
       </Form.Dropdown>
     </>
