@@ -19,6 +19,8 @@ export default function RenderForm(props: { token: string; modelName: string }) 
   const [enumMap, setEnumMap] = useState({});
 
   async function handler(values: any) {
+    const model = await getModelByName(values.dropdown);
+
     const response = await fetch("https://api.replicate.com/v1/predictions", {
       method: "POST",
       headers: {
@@ -26,10 +28,7 @@ export default function RenderForm(props: { token: string; modelName: string }) 
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        // stable diffusion 2.1
-        version: "db21e45d3f7023abc2a46ee38a23973f6dce16bb082a930b0c49861f96d1e5bf",
-
-        // This is the text prompt that will be submitted by a form on the frontend
+        version: model.latest_version.id,
         input: values,
       }),
     });
@@ -53,21 +52,25 @@ export default function RenderForm(props: { token: string; modelName: string }) 
     });
 
     const result = await response.json();
-    const options = result.latest_version.openapi_schema.components.schemas.Input.properties;
+    return result;
+  }
+
+  const parseModelInputs = (model: any) => {
+    const options = model.latest_version.openapi_schema.components.schemas.Input.properties;
 
     // convert options to array
     const optionsArray = Object.keys(options).map((key) => {
       if ("allOf" in options[key]) {
         setEnumMap((enumMap) => ({
           ...enumMap,
-          [key]: result.latest_version.openapi_schema.components.schemas[key].enum,
+          [key]: model.latest_version.openapi_schema.components.schemas[key].enum,
         }));
       }
       return { name: key, values: options[key] };
     });
 
     return optionsArray;
-  }
+  };
 
   const handleSubmit = async (values: Values) => {
     setIsLoading(true);
@@ -112,7 +115,8 @@ export default function RenderForm(props: { token: string; modelName: string }) 
   };
 
   function updateForm(modelName: string) {
-    getModelByName(modelName).then((options) => {
+    getModelByName(modelName).then((model) => {
+      const options = parseModelInputs(model);
       setOptions(options.sort((a, b) => (a.values["x-order"] > b.values["x-order"] ? 1 : -1)));
     });
   }
