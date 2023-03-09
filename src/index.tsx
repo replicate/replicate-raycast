@@ -225,6 +225,14 @@ function RenderForm(props: { token: string; modelName: string }) {
 
 function RenderFormInput(props: { option: any; enums: [string] }) {
   console.log(props.option.values.default);
+
+  function toString(value: any) {
+    if (value == null) {
+      return "";
+    } else {
+      return value.toString();
+    }
+  }
   return "allOf" in props.option.values && props.enums ? (
     <>
       <Form.Description key={props.option.name} text={props.option.name} />
@@ -237,7 +245,7 @@ function RenderFormInput(props: { option: any; enums: [string] }) {
   ) : (
     <>
       <Form.Description key={props.option.name} text={props.option.name} />
-      <Form.TextField id={props.option.name} defaultValue={props.option.values.default} />
+      <Form.TextField id={props.option.name} defaultValue={toString(props.option.values.default)} />
     </>
   );
 }
