@@ -17,6 +17,15 @@ type Values = {
   tokeneditor: string[];
 };
 
+type Option = {
+  name?: string;
+  "x-order"?: string;
+  values?: {
+    type: string;
+    enum: string[];
+  };
+};
+
 export const copyImage = async (url: string) => {
   /**
    * Thank you to https://twitter.com/kevinbatdorf for this
@@ -41,23 +50,38 @@ export const copyImage = async (url: string) => {
 
 export default function RenderForm(props: { token: string; modelName: string }) {
   const [isLoading, setIsLoading] = useState(false);
-  const [options, setOptions] = useState([]);
+  const [options, setOptions] = useState<Option[]>([]);
   const [modelName, setModelName] = useState(props.modelName);
 
   async function handler(values: Values) {
     const model = (await getModelByName(modelName)) as Model;
 
-    // filter out empty values
-    let filteredValues = Object.fromEntries(Object.entries(values).filter(([_, v]) => v));
+    /**
+     * Filter out empty values. After this we'll end up with a map that looks like this:
+     *
+     * filteredValues = {
+            guidance_scale: "7.5",
+            height: "512",
+            num_inference_steps: "50",
+            num_outputs: "1",
+            prompt: "a cow",
+            prompt_strength: "0.8",
+            scheduler: "K-LMS",
+            width: "512",
+        };
+
+     * I would love for there to be a cleaner way to do this...
+     */
+    let filteredValues: Option = Object.fromEntries(Object.entries(values).filter(([_, v]) => v));
     filteredValues = Object.fromEntries(
-      Object.entries(values).map(([k, v]) => [k.replace(model.name, "").replace("-", ""), v])
+      Object.entries(filteredValues).map(([k, v]) => [k.replace(model.name, "").replace("-", ""), v])
     );
 
+    // I know this is unforunate, but loop through and convert values to correct type
     for (const entry of Object.entries(filteredValues)) {
       const option = options.filter((option) => option.name === entry[0])[0];
 
       if (option && option.values && (option.values.type === "number" || option.values.type === "integer")) {
-        console.log(option.values.type);
         if (option.values.type === "integer") {
           filteredValues[entry[0]] = parseInt(entry[1]);
         }
@@ -77,7 +101,7 @@ export default function RenderForm(props: { token: string; modelName: string }) 
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        version: model.latest_version.id,
+        version: model?.latest_version?.id,
         input: filteredValues,
       }),
     });
@@ -101,7 +125,6 @@ export default function RenderForm(props: { token: string; modelName: string }) 
     });
 
     const result = await response.json();
-    console.log(result);
     return result;
   }
 
@@ -116,9 +139,6 @@ export default function RenderForm(props: { token: string; modelName: string }) 
       }
       return { name: key, values: newOptions[key] };
     });
-
-    console.log("options now: ", optionsArray);
-
     return optionsArray;
   };
 
@@ -126,8 +146,6 @@ export default function RenderForm(props: { token: string; modelName: string }) 
     setIsLoading(true);
     let prediction = await handler(values);
     prediction = JSON.parse(prediction);
-
-    console.log(prediction.id);
 
     while (prediction.status !== "succeeded" && prediction.status !== "failed") {
       await delay(1000);
@@ -141,7 +159,7 @@ export default function RenderForm(props: { token: string; modelName: string }) 
       prediction = await response.json();
 
       if (response.status !== 200 || prediction.status == "failed") {
-        console.log(response);
+        setIsLoading(false);
         showToast({
           style: Toast.Style.Failure,
           title: "Error",
@@ -155,6 +173,8 @@ export default function RenderForm(props: { token: string; modelName: string }) 
         });
         return;
       }
+
+      //   Show Logs
       console.log(prediction.logs);
 
       if (prediction.status === "succeeded") {
@@ -181,7 +201,7 @@ export default function RenderForm(props: { token: string; modelName: string }) 
 
         showToast({
           style: Toast.Style.Success,
-          title: "Model successfully Ran",
+          title: "Prediction Success",
           message: prediction.output[0],
           primaryAction: {
             title: "View Image",
