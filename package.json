@@ -30,10 +30,13 @@
   "dependencies": {
     "@raycast/api": "^1.48.7",
     "delay": "^5.0.0",
+    "fs": "^0.0.1-security",
     "node-fetch": "^3.3.0",
     "open": "^8.4.2",
     "open-graph-scraper": "^5.1.1",
-    "replicate": "^0.4.0"
+    "replicate": "^0.4.0",
+    "run-applescript": "^6.1.0",
+    "tempy": "^3.0.0"
   },
   "devDependencies": {
     "@types/node": "18.8.3",

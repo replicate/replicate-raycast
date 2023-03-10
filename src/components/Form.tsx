@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
-import { Form, ActionPanel, Action, showToast, Toast } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, Alert, confirmAlert, showHUD } from "@raycast/api";
 import fetch from "node-fetch";
 import delay from "delay";
 import { models, Model } from "../models";
 import open from "open";
+import { runAppleScript } from "run-applescript";
+import { temporaryFile } from "tempy";
+import fs from "fs";
 
 type Values = {
   textfield: string;
@@ -14,36 +17,58 @@ type Values = {
   tokeneditor: string[];
 };
 
+export const copyImage = async (url: string) => {
+  /**
+   * Thank you to https://twitter.com/kevinbatdorf for this
+   * clever way to copy to clipboard.
+   */
+  const tempFile = temporaryFile({ extension: "png" });
+  const { hide } = await showToast(Toast.Style.Animated, "Copying image...");
+  const response = await fetch(url);
+
+  if (response.status !== 200) {
+    await showHUD(`❗Image copy failed. Server responded with ${response.status}`);
+    hide();
+    return;
+  }
+  if (response.body !== null) {
+    response.body.pipe(fs.createWriteStream(tempFile));
+    await runAppleScript(`tell app "Finder" to set the clipboard to ( POSIX file "${tempFile}" )`);
+    await showHUD("✅ Image copied to clipboard!");
+    hide();
+  }
+};
+
 export default function RenderForm(props: { token: string; modelName: string }) {
   const [isLoading, setIsLoading] = useState(false);
   const [options, setOptions] = useState([]);
   const [modelName, setModelName] = useState(props.modelName);
 
-  async function handler(values: any) {
-    const model = await getModelByName(modelName);
+  async function handler(values: Values) {
+    const model = (await getModelByName(modelName)) as Model;
 
     // filter out empty values
-    values = Object.fromEntries(Object.entries(values).filter(([_, v]) => v));
-    values = Object.fromEntries(
+    let filteredValues = Object.fromEntries(Object.entries(values).filter(([_, v]) => v));
+    filteredValues = Object.fromEntries(
       Object.entries(values).map(([k, v]) => [k.replace(model.name, "").replace("-", ""), v])
     );
 
-    for (const entry of Object.entries(values)) {
+    for (const entry of Object.entries(filteredValues)) {
       const option = options.filter((option) => option.name === entry[0])[0];
 
       if (option && option.values && (option.values.type === "number" || option.values.type === "integer")) {
         console.log(option.values.type);
         if (option.values.type === "integer") {
-          values[entry[0]] = parseInt(entry[1]);
+          filteredValues[entry[0]] = parseInt(entry[1]);
         }
 
         if (option.values.type === "number") {
-          values[entry[0]] = parseFloat(entry[1]);
+          filteredValues[entry[0]] = parseFloat(entry[1]);
         }
       }
     }
 
-    console.log("Submission: ", values);
+    console.log("Submission: ", filteredValues);
 
     const response = await fetch("https://api.replicate.com/v1/predictions", {
       method: "POST",
@@ -53,7 +78,7 @@ export default function RenderForm(props: { token: string; modelName: string }) 
       },
       body: JSON.stringify({
         version: model.latest_version.id,
-        input: values,
+        input: filteredValues,
       }),
     });
 
@@ -136,9 +161,23 @@ export default function RenderForm(props: { token: string; modelName: string }) 
         setIsLoading(false);
         console.log("success! ", prediction.output);
 
+        await confirmAlert({
+          title: "Prediction Complete",
+          message: prediction.output[0],
+          icon: {
+            source: prediction.output[0],
+          },
+          primaryAction: {
+            title: "Copy to Clipboard",
+            onAction: () => {
+              copyImage(prediction.output[0]);
+            },
+          },
+        });
+
         showToast({
           style: Toast.Style.Success,
-          title: "Model successfully ran",
+          title: "Model successfully Ran",
           message: prediction.output[0],
           primaryAction: {
             title: "View Image",

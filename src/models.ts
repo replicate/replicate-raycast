@@ -2,11 +2,22 @@ export type Model = {
   version: string;
   url: string;
   name: string;
-  latest_version?: { id: string; openapi_schema: object };
+  latest_version?: ModelVersion;
   owner: string;
 };
 
-export function createModel(version: string, url: string, name: string, owner: string, latest_version: object): Model {
+export type ModelVersion = {
+  id: string;
+  openapi_schema: object;
+};
+
+export function createModel(
+  version: string,
+  url: string,
+  name: string,
+  owner: string,
+  latest_version: ModelVersion
+): Model {
   return {
     version,
     url,
