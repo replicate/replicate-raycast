@@ -2,6 +2,7 @@ export type Model = {
   version: string;
   url: string;
   name: string;
+  latest_version?: { id: string };
   modelOwner: string;
 };
 

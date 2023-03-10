@@ -2,9 +2,14 @@ import { useEffect, useState } from "react";
 import { ActionPanel, Action, Grid } from "@raycast/api";
 import DetailModel from "./DetailModel";
 import fetch from "node-fetch";
+import { Model } from "../models";
+
+interface Result {
+  models: Model[];
+}
 
 export default function ListModels(props: { token: string; collection: string }) {
-  const [models, setModels] = useState([]);
+  const [models, setModels] = useState<Model[]>([]);
 
   async function getModels(collection: string) {
     const response = await fetch(`https://api.replicate.com/v1/collections/${collection}`, {
@@ -15,24 +20,14 @@ export default function ListModels(props: { token: string; collection: string })
       },
     });
 
-    const result = await response.json();
+    const result: Result = (await response.json()) as Result;
     setModels(result.models);
 
     return JSON.stringify(result.models);
   }
 
-  //   async function getImage(url: string) {
-  //     const options = { url: url };
-  //     const { error, result, response } = await ogs(options);
-  //     if (result) {
-  //       console.log(result.twitterImage.url);
-  //       return result.twitterImage.url;
-  //     }
-  //     return "🥳";
-  //   }
-
   useEffect(() => {
-    getModels("text-to-image");
+    getModels(props.collection);
   });
 
   return (
@@ -40,7 +35,7 @@ export default function ListModels(props: { token: string; collection: string })
       <Grid.Section title="Text to Image Models">
         {models.map((model) => (
           <Grid.Item
-            key={model.latest_version.id}
+            key={model.latest_version?.id}
             title={model.name}
             content={"🖼️"}
             actions={
