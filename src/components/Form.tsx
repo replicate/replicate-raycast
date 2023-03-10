@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Form, ActionPanel, Action, showToast, Toast, Alert, confirmAlert, showHUD } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, confirmAlert, showHUD } from "@raycast/api";
 import fetch from "node-fetch";
 import delay from "delay";
 import { models, Model } from "../models";
@@ -24,6 +24,12 @@ type Option = {
     type: string;
     enum: string[];
   };
+  [key: string]: any;
+};
+
+// Okay I got bored of writing TypeScript types so I'm cheating here. Sue me.
+type Prediction = {
+  [key: string]: any;
 };
 
 export const copyImage = async (url: string) => {
@@ -83,11 +89,11 @@ export default function RenderForm(props: { token: string; modelName: string }) 
 
       if (option && option.values && (option.values.type === "number" || option.values.type === "integer")) {
         if (option.values.type === "integer") {
-          filteredValues[entry[0]] = parseInt(entry[1]);
+          filteredValues[entry[0]] = parseInt(entry[1] as string);
         }
 
         if (option.values.type === "number") {
-          filteredValues[entry[0]] = parseFloat(entry[1]);
+          filteredValues[entry[0]] = parseFloat(entry[1] as string);
         }
       }
     }
@@ -106,8 +112,8 @@ export default function RenderForm(props: { token: string; modelName: string }) 
       }),
     });
 
-    const prediction = await response.json();
-    return JSON.stringify(prediction);
+    const prediction = (await response.json()) as Prediction;
+    return prediction;
   }
 
   async function getModelByName(name: string) {
@@ -135,7 +141,11 @@ export default function RenderForm(props: { token: string; modelName: string }) 
     const optionsArray = Object.keys(options).map((key) => {
       const newOptions = options;
       if ("allOf" in options[key]) {
-        newOptions[key]["enums"] = model.latest_version.openapi_schema.components.schemas;
+        // newOptions[key]["enums"] = model.latest_version.openapi_schema.components.schemas;
+        const relevantEnums = Object.entries(model.latest_version.openapi_schema.components.schemas).filter(
+          (entry) => entry[0] === key
+        )[0][1].enum;
+        return { name: key, values: newOptions[key], enums: relevantEnums };
       }
       return { name: key, values: newOptions[key] };
     });
@@ -145,7 +155,6 @@ export default function RenderForm(props: { token: string; modelName: string }) 
   const handleSubmit = async (values: Values) => {
     setIsLoading(true);
     let prediction = await handler(values);
-    prediction = JSON.parse(prediction);
 
     while (prediction.status !== "succeeded" && prediction.status !== "failed") {
       await delay(1000);
@@ -247,7 +256,7 @@ export default function RenderForm(props: { token: string; modelName: string }) 
         return option.values.type == "string" || "integer" || "number" ? (
           RenderFormInput({ option: option, modelName: modelName })
         ) : (
-          <Form.Description key={option.name} text={option.name} />
+          <Form.Description key={option.name} text={option.name || "Undefined"} />
         );
       })}
     </Form>
@@ -255,10 +264,6 @@ export default function RenderForm(props: { token: string; modelName: string }) 
 }
 
 function RenderFormInput(props: { option: any; modelName: string }) {
-  function getEnum(optionName: string) {
-    return Object.entries(props.option.values.enums).filter((entry) => entry[0] === optionName)[0][1].enum;
-  }
-
   function toString(value: string | number | undefined) {
     if (value == null) {
       return "";
@@ -274,7 +279,7 @@ function RenderFormInput(props: { option: any; modelName: string }) {
         id={`${props.modelName}-${props.option.name}`}
         defaultValue={toString(props.option.values.default)}
       >
-        {getEnum(props.option.name).map((value: string | number, i: number) => (
+        {props.option.enums.map((value: string | number, i: number) => (
           <Form.Dropdown.Item key={`${props.option.name}-${i}`} value={toString(value)} title={toString(value)} />
         ))}
       </Form.Dropdown>
