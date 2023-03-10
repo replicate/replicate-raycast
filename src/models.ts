@@ -12,7 +12,11 @@ export type Model = {
 
 export type ModelVersion = {
   id: string;
-  openapi_schema: object;
+  openapi_schema: OpenApiSchema;
+};
+
+export type OpenApiSchema = {
+  [key: string]: any;
 };
 
 export function createModel(

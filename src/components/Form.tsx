@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Form, ActionPanel, Action, showToast, Toast, confirmAlert, showHUD } from "@raycast/api";
 import fetch from "node-fetch";
 import delay from "delay";
-import { models, Model } from "../models";
+import { models, Model, OpenApiSchema } from "../models";
 import open from "open";
 import { runAppleScript } from "run-applescript";
 import { temporaryFile } from "tempy";
@@ -21,6 +21,8 @@ type Option = {
   name?: string;
   "x-order"?: string;
   values?: {
+    default: string;
+    description: string;
     type: string;
     enum: string[];
   };
@@ -130,21 +132,27 @@ export default function RenderForm(props: { token: string; modelName: string }) 
       },
     });
 
-    const result = await response.json();
+    const result = (await response.json()) as Model;
     return result;
   }
 
-  const parseModelInputs = (model: any) => {
-    const options = model.latest_version.openapi_schema.components.schemas.Input.properties;
+  const parseModelInputs = (model: Model) => {
+    const options = model.latest_version?.openapi_schema.components.schemas.Input.properties;
 
     // convert options to array
     const optionsArray = Object.keys(options).map((key) => {
       const newOptions = options;
       if ("allOf" in options[key]) {
         // newOptions[key]["enums"] = model.latest_version.openapi_schema.components.schemas;
-        const relevantEnums = Object.entries(model.latest_version.openapi_schema.components.schemas).filter(
-          (entry) => entry[0] === key
-        )[0][1].enum;
+
+        // This is gnarly, but it's how I'm getting the relevant enums for the dropdown
+        // by parsing the openapi_schema and filtering out the enums that match the name of the option.
+        const relevantEnums = (
+          (Object.entries(model.latest_version?.openapi_schema.components.schemas) as []).filter(
+            (entry) => (entry[0] as string) === key
+          )[0][1] as OpenApiSchema
+        ).enum;
+
         return { name: key, values: newOptions[key], enums: relevantEnums };
       }
       return { name: key, values: newOptions[key] };
@@ -165,7 +173,7 @@ export default function RenderForm(props: { token: string; modelName: string }) 
           "Content-Type": "application/json",
         },
       });
-      prediction = await response.json();
+      prediction = (await response.json()) as Prediction;
 
       if (response.status !== 200 || prediction.status == "failed") {
         setIsLoading(false);
@@ -205,6 +213,9 @@ export default function RenderForm(props: { token: string; modelName: string }) 
             onAction: () => {
               copyImage(prediction.output[0]);
             },
+          },
+          dismissAction: {
+            title: "Close",
           },
         });
 
@@ -253,7 +264,7 @@ export default function RenderForm(props: { token: string; modelName: string }) 
       </Form.Dropdown>
       <Form.Separator />
       {options.map((option) => {
-        return option.values.type == "string" || "integer" || "number" ? (
+        return option.values?.type == "string" || "integer" || "number" ? (
           RenderFormInput({ option: option, modelName: modelName })
         ) : (
           <Form.Description key={option.name} text={option.name || "Undefined"} />
@@ -263,7 +274,7 @@ export default function RenderForm(props: { token: string; modelName: string }) 
   );
 }
 
-function RenderFormInput(props: { option: any; modelName: string }) {
+function RenderFormInput(props: { option: Option; modelName: string }) {
   function toString(value: string | number | undefined) {
     if (value == null) {
       return "";
@@ -272,13 +283,17 @@ function RenderFormInput(props: { option: any; modelName: string }) {
     }
   }
 
-  return "allOf" in props.option.values ? (
+  const optionValues = props.option.values;
+  const optionDefault = props.option.values?.default;
+  const optionDescription = props.option.values?.description;
+
+  return "allOf" in (optionValues || []) ? (
     <>
-      <Form.Description key={`description-${props.option.name}-${props.modelName}`} text={props.option.name} />
-      <Form.Dropdown
-        id={`${props.modelName}-${props.option.name}`}
-        defaultValue={toString(props.option.values.default)}
-      >
+      <Form.Description
+        key={`description-${props.option.name}-${props.modelName}`}
+        text={props.option.name || "Undefined"}
+      />
+      <Form.Dropdown id={`${props.modelName}-${props.option.name}`} defaultValue={toString(optionDefault)}>
         {props.option.enums.map((value: string | number, i: number) => (
           <Form.Dropdown.Item key={`${props.option.name}-${i}`} value={toString(value)} title={toString(value)} />
         ))}
@@ -286,11 +301,11 @@ function RenderFormInput(props: { option: any; modelName: string }) {
     </>
   ) : (
     <>
-      <Form.Description key={`description-${props.option.name}`} text={props.option.name} />
+      <Form.Description key={`description-${props.option.name}`} text={props.option.name || "Undefined"} />
       <Form.TextField
         id={`${props.modelName}-${props.option.name}`}
-        defaultValue={toString(props.option.values.default)}
-        info={props.option.values.description}
+        defaultValue={toString(optionDefault)}
+        info={optionDescription}
       />
     </>
   );
