@@ -52,7 +52,7 @@ export default function DetailModel(props: { token: string; modelOwner: string; 
           <Detail.Metadata.Label title="Owner" text={model.owner} />
           <Detail.Metadata.Label title="Description" text={model.description} />
           <Detail.Metadata.TagList title="Type">
-            <Detail.Metadata.TagList.Item text={model.visibility} color={"#eed535"} />
+            <Detail.Metadata.TagList.Item text={model.visibility || "private"} color={"#eed535"} />
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
           <Detail.Metadata.Link title="Replicate" target={model.url} text="Replicate" />

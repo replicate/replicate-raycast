@@ -159,11 +159,15 @@ export default function RenderForm(props: { token: string; modelName: string }) 
 
       if (prediction.status === "succeeded") {
         setIsLoading(false);
-        console.log("success! ", prediction.output);
+
+        const start = new Date(prediction.created_at);
+        const end = new Date(prediction.completed_at);
+
+        const differenceInSeconds = (end.getTime() - start.getTime()) / 1000;
 
         await confirmAlert({
           title: "Prediction Complete",
-          message: prediction.output[0],
+          message: `Your prediction for '${prediction.input.prompt}' finished in ${differenceInSeconds} seconds. Copy the image to your clipboard?`,
           icon: {
             source: prediction.output[0],
           },
