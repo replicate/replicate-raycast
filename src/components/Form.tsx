@@ -63,7 +63,7 @@ export default function RenderForm(props: { token: string; modelName: string }) 
 
   async function getModelByName(name: string) {
     const model = models.filter((model) => model.name === name);
-    return getModel(model[0].modelOwner, model[0].name);
+    return getModel(model[0].owner, model[0].name);
   }
 
   async function getModel(owner: string, name: string) {
@@ -76,6 +76,7 @@ export default function RenderForm(props: { token: string; modelName: string }) 
     });
 
     const result = await response.json();
+    console.log(result);
     return result;
   }
 
