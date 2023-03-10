@@ -4,6 +4,10 @@ export type Model = {
   name: string;
   latest_version?: ModelVersion;
   owner: string;
+  github_user?: string;
+  description?: string;
+  visibility?: string;
+  github_url?: string;
 };
 
 export type ModelVersion = {

@@ -2,10 +2,10 @@ import { useEffect, useState } from "react";
 import { ActionPanel, Action, Detail } from "@raycast/api";
 import RenderForm from "./Form";
 import fetch from "node-fetch";
+import { Model } from "../models";
 
 export default function DetailModel(props: { token: string; modelOwner: string; modelName: string }) {
-  const [model, setModel] = useState({});
-  const [image, setImage] = useState("🖼️");
+  const [model, setModel] = useState<Model>({} as Model);
   const [markdown, setMarkdown] = useState("");
 
   async function getModel(owner: string, name: string) {
@@ -17,7 +17,7 @@ export default function DetailModel(props: { token: string; modelOwner: string; 
       },
     });
 
-    const result = await response.json();
+    const result = (await response.json()) as Model;
     setModel(result);
 
     return JSON.stringify(result);
@@ -56,7 +56,7 @@ export default function DetailModel(props: { token: string; modelOwner: string; 
           </Detail.Metadata.TagList>
           <Detail.Metadata.Separator />
           <Detail.Metadata.Link title="Replicate" target={model.url} text="Replicate" />
-          <Detail.Metadata.Link title="GitHub" target={model.github_url} text="GitHub" />
+          <Detail.Metadata.Link title="GitHub" target={model.github_url || ""} text="GitHub" />
           <Detail.Metadata.Link title="Replicate" target={model.url} text="Replicate" />
         </Detail.Metadata>
       }
