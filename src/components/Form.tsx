@@ -184,6 +184,7 @@ export default function RenderForm(props: { token: string; modelName: string }) 
       }
       return { name: key, values: newOptions[key] };
     });
+
     return optionsArray;
   };
 
@@ -285,8 +286,6 @@ export default function RenderForm(props: { token: string; modelName: string }) 
         </ActionPanel>
       }
     >
-      {/* <Form.Description text="Run a model on Replicate" /> */}
-
       <Form.Dropdown id="dropdown" title="Model" defaultValue={props.modelName} onChange={(e) => updateForm(e)}>
         {modelOptions.map((model) => (
           <Form.Dropdown.Item key={model.id} value={model.name} title={model.name} />
@@ -319,7 +318,7 @@ function RenderFormInput(props: { option: Option; modelName: string }) {
   const optionDefault = props.option.values?.default;
   const optionDescription = props.option.values?.description;
 
-  const inputId = generateId(props.option.name as string);
+  console.log(props.option.name, props.option.enums);
 
   return "allOf" in (optionValues || []) ? (
     <>
@@ -327,7 +326,8 @@ function RenderFormInput(props: { option: Option; modelName: string }) {
         key={`description-${props.option.name}-${props.modelName}`}
         text={props.option.name || "Undefined"}
       />
-      <Form.Dropdown id={inputId} defaultValue={toString(optionDefault)}>
+      // Note, the ID is used to get the value of input field. Don't change the ID!
+      <Form.Dropdown id={`${props.modelName}-${props.option.name}`} defaultValue={toString(optionDefault)}>
         {props.option.enums.map((value: string | number, i: number) => (
           <Form.Dropdown.Item key={`${props.option.name}-${i}`} value={toString(value)} title={toString(value)} />
         ))}
@@ -336,7 +336,12 @@ function RenderFormInput(props: { option: Option; modelName: string }) {
   ) : (
     <>
       <Form.Description key={`description-${props.option.name}`} text={props.option.name || "Undefined"} />
-      <Form.TextField id={inputId} defaultValue={toString(optionDefault)} info={optionDescription} />
+      // Note, the ID is used to get the value of input field. Don't change the ID!
+      <Form.TextField
+        id={`${props.modelName}-${props.option.name}`}
+        defaultValue={toString(optionDefault)}
+        info={optionDescription}
+      />
     </>
   );
 }
