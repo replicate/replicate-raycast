@@ -165,10 +165,10 @@ export default function RenderForm(props: { token: string; modelName: string }) 
 
   const parseModelInputs = (model: Model) => {
     const options = model.latest_version?.openapi_schema.components.schemas.Input.properties;
+    let newOptions: [any] = [];
 
     // convert options to array
-    const optionsArray = Object.keys(options).map((key) => {
-      const newOptions = options;
+    Object.keys(options).map((key) => {
       if ("allOf" in options[key]) {
         // newOptions[key]["enums"] = model.latest_version.openapi_schema.components.schemas;
 
@@ -180,12 +180,14 @@ export default function RenderForm(props: { token: string; modelName: string }) 
           )[0][1] as OpenApiSchema
         ).enum;
 
-        return { name: key, values: newOptions[key], enums: relevantEnums };
+        newOptions.push({ name: key, values: options[key], enums: relevantEnums });
+      } else {
+        newOptions.push({ name: key, values: options[key], enums: [] });
       }
-      return { name: key, values: newOptions[key] };
+      console.log("new optoins is now: ", newOptions);
     });
 
-    return optionsArray;
+    return newOptions;
   };
 
   const handleSubmit = async (values: Values) => {
@@ -293,13 +295,7 @@ export default function RenderForm(props: { token: string; modelName: string }) 
       </Form.Dropdown>
       <Form.Separator />
       {options.map((option, i) => {
-        return option.values?.type == "string" ||
-          option.values?.type == "integer" ||
-          option.values?.type == "number" ? (
-          RenderFormInput({ option: option, modelName: modelName })
-        ) : (
-          <Form.Description key={`option.name-${i}`} text={option.name || "Undefined"} />
-        );
+        return RenderFormInput({ option: option, modelName: modelName });
       })}
     </Form>
   );
@@ -318,7 +314,7 @@ function RenderFormInput(props: { option: Option; modelName: string }) {
   const optionDefault = props.option.values?.default;
   const optionDescription = props.option.values?.description;
 
-  console.log(props.option.name, props.option.enums);
+  console.log(props.option.name, props.option);
 
   // Note, the ID is used to get the value of input field. Don't change the IDs!
   return "allOf" in (optionValues || []) ? (
