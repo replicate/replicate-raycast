@@ -1,7 +1,6 @@
 import { ActionPanel, Action, getPreferenceValues, List, Icon } from "@raycast/api";
 import { models } from "./models";
 import RenderForm from "./components/Form";
-import ListModels from "./components/ListModels";
 
 export default function Command() {
   const { token } = getPreferenceValues();
