@@ -1,8 +1,18 @@
 {
+  "name": "replicate",
+  "title": "Replicate",
+  "description": "Replicate is a tool for creating and sharing machine learning models. This extension allows you to create and view your predictions in Raycast.",
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "icon": "replicate.png",
-  "authors": ["charlieholtz", "KevinBatdorf"],
-  "contributors": ["bfirsh", "charlieholtz", "KevinBatdorf"],
+  "authors": [
+    "charlieholtz",
+    "KevinBatdorf"
+  ],
+  "contributors": [
+    "bfirsh",
+    "charlieholtz",
+    "KevinBatdorf"
+  ],
   "categories": [
     "Media",
     "Design Tools",
@@ -11,10 +21,10 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "replicate",
-      "title": "View Predictions",
+      "name": "index",
+      "title": "Replicate",
       "subtitle": "Replicate",
-      "description": "View your Replicate predictions",
+      "description": "Access Replicate",
       "mode": "view"
     }
   ],
@@ -31,8 +41,10 @@
   "dependencies": {
     "@raycast/api": "^1.42.2",
     "@raycast/utils": "^1.4.10",
+    "delay": "^5.0.0",
     "is-image": "^3.1.0",
     "node-fetch": "^3.2.10",
+    "open": "^8.4.2",
     "run-applescript": "^6.0.0",
     "sql.js": "^1.8.0",
     "tempy": "^3.0.0"
