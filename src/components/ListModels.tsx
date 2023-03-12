@@ -32,7 +32,7 @@ export default function ListModels(props: { token: string; collection: string })
 
   return (
     <Grid columns={5}>
-      <Grid.Section title="Text to Image Models">
+      <Grid.Section title="Diffusion Models">
         {models.map((model) => (
           <Grid.Item
             key={model.latest_version?.id}

@@ -44,7 +44,7 @@ export default function Command() {
           title="Explore Models"
           actions={
             <ActionPanel>
-              <Action.Push title="Explore" target={<ListModels token={token} collection={"text-to-image"} />} />
+              <Action.Push title="Explore" target={<ListModels token={token} collection={"diffusion-models"} />} />
             </ActionPanel>
           }
         />
