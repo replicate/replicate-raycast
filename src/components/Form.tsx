@@ -60,6 +60,7 @@ export default function RenderForm(props: { token: string; modelName: string }) 
   const [isLoading, setIsLoading] = useState(false);
   const [options, setOptions] = useState<Option[]>([]);
   const [modelName, setModelName] = useState(props.modelName);
+  const [modelOptions, setModelOptions] = useState<Model[]>(models);
 
   async function handler(values: Values) {
     const model = (await getModelByName(modelName)) as Model;
@@ -119,7 +120,7 @@ export default function RenderForm(props: { token: string; modelName: string }) 
   }
 
   async function getModelByName(name: string) {
-    const model = models.filter((model) => model.name === name);
+    const model = modelOptions.filter((model) => model.name === name);
     return getModel(model[0].owner, model[0].name);
   }
 
@@ -258,7 +259,7 @@ export default function RenderForm(props: { token: string; modelName: string }) 
       {/* <Form.Description text="Run a model on Replicate" /> */}
 
       <Form.Dropdown id="dropdown" title="Model" defaultValue={props.modelName} onChange={(e) => updateForm(e)}>
-        {models.map((model) => (
+        {modelOptions.map((model) => (
           <Form.Dropdown.Item key={model.name} value={model.name} title={model.name} />
         ))}
       </Form.Dropdown>
