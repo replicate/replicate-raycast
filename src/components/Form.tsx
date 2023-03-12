@@ -7,6 +7,7 @@ import open from "open";
 import { runAppleScript } from "run-applescript";
 import { temporaryFile } from "tempy";
 import fs from "fs";
+import crypto from "crypto";
 
 type Values = {
   textfield: string;
@@ -34,9 +35,11 @@ type Prediction = {
   [key: string]: any;
 };
 
-interface ModelList {
+interface ModelResult {
   models: Model[];
 }
+
+const generateId = (name: string) => `${crypto.randomUUID()}-${name}`;
 
 export const copyImage = async (url: string) => {
   /**
@@ -150,10 +153,14 @@ export default function RenderForm(props: { token: string; modelName: string }) 
       },
     });
 
-    const result: ModelList = (await response.json()) as ModelList;
-    console.log(result);
+    const result: ModelResult = (await response.json()) as ModelResult;
 
-    return JSON.stringify(result.models);
+    // Add unique id to each model
+    result.models.map((model: Model) => {
+      model.id = generateId(model.name);
+    });
+
+    return JSON.stringify(result.models as Model[]);
   }
 
   const parseModelInputs = (model: Model) => {
@@ -282,17 +289,17 @@ export default function RenderForm(props: { token: string; modelName: string }) 
 
       <Form.Dropdown id="dropdown" title="Model" defaultValue={props.modelName} onChange={(e) => updateForm(e)}>
         {modelOptions.map((model) => (
-          <Form.Dropdown.Item key={model.name} value={model.name} title={model.name} />
+          <Form.Dropdown.Item key={model.id} value={model.name} title={model.name} />
         ))}
       </Form.Dropdown>
       <Form.Separator />
-      {options.map((option) => {
+      {options.map((option, i) => {
         return option.values?.type == "string" ||
           option.values?.type == "integer" ||
           option.values?.type == "number" ? (
           RenderFormInput({ option: option, modelName: modelName })
         ) : (
-          <Form.Description key={option.name} text={option.name || "Undefined"} />
+          <Form.Description key={`option.name-${i}`} text={option.name || "Undefined"} />
         );
       })}
     </Form>
@@ -312,13 +319,15 @@ function RenderFormInput(props: { option: Option; modelName: string }) {
   const optionDefault = props.option.values?.default;
   const optionDescription = props.option.values?.description;
 
+  const inputId = generateId(props.option.name as string);
+
   return "allOf" in (optionValues || []) ? (
     <>
       <Form.Description
         key={`description-${props.option.name}-${props.modelName}`}
         text={props.option.name || "Undefined"}
       />
-      <Form.Dropdown id={`${props.modelName}-${props.option.name}`} defaultValue={toString(optionDefault)}>
+      <Form.Dropdown id={inputId} defaultValue={toString(optionDefault)}>
         {props.option.enums.map((value: string | number, i: number) => (
           <Form.Dropdown.Item key={`${props.option.name}-${i}`} value={toString(value)} title={toString(value)} />
         ))}
@@ -327,11 +336,7 @@ function RenderFormInput(props: { option: Option; modelName: string }) {
   ) : (
     <>
       <Form.Description key={`description-${props.option.name}`} text={props.option.name || "Undefined"} />
-      <Form.TextField
-        id={`${props.modelName}-${props.option.name}`}
-        defaultValue={toString(optionDefault)}
-        info={optionDescription}
-      />
+      <Form.TextField id={inputId} defaultValue={toString(optionDefault)} info={optionDescription} />
     </>
   );
 }

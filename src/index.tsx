@@ -1,4 +1,4 @@
-import { ActionPanel, Action, getPreferenceValues, List } from "@raycast/api";
+import { ActionPanel, Action, getPreferenceValues, List, Icon } from "@raycast/api";
 import { models } from "./models";
 import RenderForm from "./components/Form";
 import ListModels from "./components/ListModels";
@@ -42,6 +42,7 @@ export default function Command() {
               "https://user-images.githubusercontent.com/14149230/223854538-71327569-76b5-4f77-903c-edf205569927.png",
           }}
           title="Explore Models"
+          accessories={[{ icon: Icon.ArrowNe }]}
           actions={
             <Action.OpenInBrowser title="Show Details" url={"https://replicate.com/collections/diffusion-models"} />
           }
@@ -52,6 +53,7 @@ export default function Command() {
               "https://user-images.githubusercontent.com/14149230/223854538-71327569-76b5-4f77-903c-edf205569927.png",
           }}
           title="Dashboard"
+          accessories={[{ icon: Icon.ArrowNe }]}
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url="https://replicate.com" />
