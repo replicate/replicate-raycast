@@ -320,13 +320,13 @@ function RenderFormInput(props: { option: Option; modelName: string }) {
 
   console.log(props.option.name, props.option.enums);
 
+  // Note, the ID is used to get the value of input field. Don't change the IDs!
   return "allOf" in (optionValues || []) ? (
     <>
       <Form.Description
         key={`description-${props.option.name}-${props.modelName}`}
         text={props.option.name || "Undefined"}
       />
-      // Note, the ID is used to get the value of input field. Don't change the ID!
       <Form.Dropdown id={`${props.modelName}-${props.option.name}`} defaultValue={toString(optionDefault)}>
         {props.option.enums.map((value: string | number, i: number) => (
           <Form.Dropdown.Item key={`${props.option.name}-${i}`} value={toString(value)} title={toString(value)} />
@@ -336,7 +336,6 @@ function RenderFormInput(props: { option: Option; modelName: string }) {
   ) : (
     <>
       <Form.Description key={`description-${props.option.name}`} text={props.option.name || "Undefined"} />
-      // Note, the ID is used to get the value of input field. Don't change the ID!
       <Form.TextField
         id={`${props.modelName}-${props.option.name}`}
         defaultValue={toString(optionDefault)}
