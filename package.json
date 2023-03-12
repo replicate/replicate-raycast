@@ -26,6 +26,13 @@
       "subtitle": "Replicate",
       "description": "Access Replicate",
       "mode": "view"
+    },
+    {
+      "name": "viewPredictions",
+      "title": "View Predictions",
+      "subtitle": "Replicate",
+      "description": "Access Replicate",
+      "mode": "view"
     }
   ],
   "preferences": [

@@ -1,5 +1,6 @@
 import { ActionPanel, Action, getPreferenceValues, List, Icon } from "@raycast/api";
 import RenderForm from "./components/Form";
+import ViewPredictions from "./viewPredictions";
 
 export default function Command() {
   const { token } = getPreferenceValues();
@@ -27,10 +28,7 @@ export default function Command() {
           title="View predictions"
           actions={
             <ActionPanel>
-              <Action.OpenInBrowser
-                title="Show Details"
-                url={"raycast://extensions/KevinBatdorf/replicate/replicate"}
-              />
+              <Action.Push title="View Predictions" target={<ViewPredictions />} />
             </ActionPanel>
           }
         />
