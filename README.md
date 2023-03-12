@@ -1,6 +1,6 @@
 # Replicate API Raycast Extension
 
-View your prediction history and search for predictions by prompt.
+Run models, view your prediction history, and more.
 
 Create an account and get an API token here (required): https://replicate.com
 
