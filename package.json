@@ -23,15 +23,8 @@
     {
       "name": "index",
       "title": "Replicate",
-      "subtitle": "Replicate",
-      "description": "Access Replicate",
-      "mode": "view"
-    },
-    {
-      "name": "viewPredictions",
-      "title": "View Predictions",
-      "subtitle": "Replicate",
-      "description": "Access Replicate",
+      "subtitle": "Run models in the cloud",
+      "description": "Run models in the cloud",
       "mode": "view"
     }
   ],

@@ -13,7 +13,7 @@ export default function Command() {
             source:
               "https://user-images.githubusercontent.com/14149230/223854538-71327569-76b5-4f77-903c-edf205569927.png",
           }}
-          title="Run a model"
+          title="Run a Model"
           actions={
             <ActionPanel>
               <Action.Push title="Show Details" target={<RenderForm token={token} modelName={"stable-diffusion"} />} />
@@ -25,7 +25,7 @@ export default function Command() {
             source:
               "https://user-images.githubusercontent.com/14149230/223854538-71327569-76b5-4f77-903c-edf205569927.png",
           }}
-          title="View predictions"
+          title="View Predictions"
           actions={
             <ActionPanel>
               <Action.Push title="View Predictions" target={<ViewPredictions />} />
@@ -53,6 +53,19 @@ export default function Command() {
           actions={
             <ActionPanel>
               <Action.OpenInBrowser url="https://replicate.com" />
+            </ActionPanel>
+          }
+        />
+        <List.Item
+          icon={{
+            source:
+              "https://user-images.githubusercontent.com/14149230/223854538-71327569-76b5-4f77-903c-edf205569927.png",
+          }}
+          title="Docs"
+          accessories={[{ icon: Icon.ArrowNe }]}
+          actions={
+            <ActionPanel>
+              <Action.OpenInBrowser url="https://replicate.com/docs" />
             </ActionPanel>
           }
         />
