@@ -1,8 +1,8 @@
 {
   "$schema": "https://www.raycast.com/schemas/extension.json",
-  "name": "run_replicate",
-  "title": "Run Replicate Models",
-  "description": "Run replicate models",
+  "name": "replicate",
+  "title": "Replicate",
+  "description": "Run Replicate models and view predictions",
   "icon": "replicate.png",
   "author": "charlieholtz",
   "categories": [
