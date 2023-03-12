@@ -43,9 +43,7 @@ export default function Command() {
           }}
           title="Explore Models"
           actions={
-            <ActionPanel>
-              <Action.Push title="Explore" target={<ListModels token={token} collection={"diffusion-models"} />} />
-            </ActionPanel>
+            <Action.OpenInBrowser title="Show Details" url={"https://replicate.com/collections/diffusion-models"} />
           }
         />
         <List.Item
