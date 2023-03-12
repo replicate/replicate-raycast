@@ -165,10 +165,9 @@ export default function RenderForm(props: { token: string; modelName: string }) 
 
   const parseModelInputs = (model: Model) => {
     const options = model.latest_version?.openapi_schema.components.schemas.Input.properties;
-    let newOptions: [any] = [];
 
     // convert options to array
-    Object.keys(options).map((key) => {
+    const newOptions = Object.keys(options).map((key) => {
       if ("allOf" in options[key]) {
         // newOptions[key]["enums"] = model.latest_version.openapi_schema.components.schemas;
 
@@ -180,11 +179,10 @@ export default function RenderForm(props: { token: string; modelName: string }) 
           )[0][1] as OpenApiSchema
         ).enum;
 
-        newOptions.push({ name: key, values: options[key], enums: relevantEnums });
+        return { name: key, values: options[key], enums: relevantEnums };
       } else {
-        newOptions.push({ name: key, values: options[key], enums: [] });
+        return { name: key, values: options[key], enums: [] };
       }
-      console.log("new optoins is now: ", newOptions);
     });
 
     return newOptions;
@@ -313,8 +311,6 @@ function RenderFormInput(props: { option: Option; modelName: string }) {
   const optionValues = props.option.values;
   const optionDefault = props.option.values?.default;
   const optionDescription = props.option.values?.description;
-
-  console.log(props.option.name, props.option);
 
   // Note, the ID is used to get the value of input field. Don't change the IDs!
   return "allOf" in (optionValues || []) ? (
