@@ -34,6 +34,10 @@ type Prediction = {
   [key: string]: any;
 };
 
+interface ModelList {
+  models: Model[];
+}
+
 export const copyImage = async (url: string) => {
   /**
    * Thank you to https://twitter.com/kevinbatdorf for this
@@ -135,6 +139,21 @@ export default function RenderForm(props: { token: string; modelName: string }) 
 
     const result = (await response.json()) as Model;
     return result;
+  }
+
+  async function getModelsByCollection(collection: string) {
+    const response = await fetch(`https://api.replicate.com/v1/collections/${collection}`, {
+      method: "GET",
+      headers: {
+        Authorization: `Token ${props.token}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const result: ModelList = (await response.json()) as ModelList;
+    console.log(result);
+
+    return JSON.stringify(result.models);
   }
 
   const parseModelInputs = (model: Model) => {
@@ -245,6 +264,9 @@ export default function RenderForm(props: { token: string; modelName: string }) 
 
   useEffect(() => {
     updateForm(props.modelName);
+    getModelsByCollection("diffusion-models").then((models) => {
+      setModelOptions(JSON.parse(models));
+    });
   }, []);
 
   return (
