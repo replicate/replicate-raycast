@@ -1,10 +1,8 @@
 # Replicate API Raycast Extension
 
-Run models, view your prediction history, and more.
+Run generative AI models via Replicate.
 
-Create an account and get an API token here (required): https://replicate.com
-
-If you attempt to copy an image to the clipboard, you will be asked by the system for permission.
+Run models, view your prediction history, and more. To get started, create a Replicate account and get an API token here (required): https://replicate.com
 
 Source repo: https://github.com/replicate/replicate-raycast/tree/main
 
