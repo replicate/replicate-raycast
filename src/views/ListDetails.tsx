@@ -1,7 +1,7 @@
 import { Action, ActionPanel, Icon, List } from "@raycast/api";
 import { useSQL } from "@raycast/utils";
 import { DB_FILE_PATH } from "../constants";
-import { copyImage } from "../utils/helpers";
+import { copyImage, saveImage } from "../utils/helpers";
 import { dbEntry } from "../types";
 
 type Props = {
@@ -29,6 +29,7 @@ export const ListDetails = ({ isLoading, search, setSearch }: Props) => {
             detail={<List.Item.Detail markdown={markdown} />}
             actions={
               <ActionPanel>
+                <Action icon={Icon.SaveDocument} title="Save Image" onAction={() => saveImage(output[0])} />
                 <Action icon={Icon.Image} title="Copy Image" onAction={() => copyImage(src)} />
                 {prompt && <Action.CopyToClipboard icon={Icon.Text} title="Copy Prompt" content={prompt.trim()} />}
               </ActionPanel>

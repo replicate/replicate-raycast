@@ -1,13 +1,11 @@
 import { useEffect, useState } from "react";
-import { Form, ActionPanel, Action, showToast, Toast, confirmAlert, showHUD } from "@raycast/api";
+import { Form, ActionPanel, Action, showToast, Toast, confirmAlert } from "@raycast/api";
 import fetch from "node-fetch";
 import delay from "delay";
 import { models, Model, OpenApiSchema } from "../models";
 import open from "open";
-import { runAppleScript } from "run-applescript";
-import { temporaryFile } from "tempy";
-import fs from "fs";
 import crypto from "crypto";
+import { copyImage, saveImage } from "../utils/helpers";
 
 type Values = {
   textfield: string;
@@ -40,28 +38,6 @@ interface ModelResult {
 }
 
 const generateId = (name: string) => `${crypto.randomUUID()}-${name}`;
-
-export const copyImage = async (url: string) => {
-  /**
-   * Thank you to https://twitter.com/kevinbatdorf for this
-   * clever way to copy to clipboard.
-   */
-  const tempFile = temporaryFile({ extension: "png" });
-  const { hide } = await showToast(Toast.Style.Animated, "Copying image...");
-  const response = await fetch(url);
-
-  if (response.status !== 200) {
-    await showHUD(`❗Image copy failed. Server responded with ${response.status}`);
-    hide();
-    return;
-  }
-  if (response.body !== null) {
-    response.body.pipe(fs.createWriteStream(tempFile));
-    await runAppleScript(`tell app "Finder" to set the clipboard to ( POSIX file "${tempFile}" )`);
-    await showHUD("✅ Image copied to clipboard!");
-    hide();
-  }
-};
 
 export default function RenderForm(props: { token: string; modelName: string }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -252,9 +228,9 @@ export default function RenderForm(props: { token: string; modelName: string }) 
           title: "Prediction Success",
           message: prediction.output[0],
           primaryAction: {
-            title: "View Image",
+            title: "Save Output as File",
             onAction: () => {
-              open("raycast://extensions/KevinBatdorf/replicate/replicate");
+              saveImage(prediction.output[0]);
             },
           },
         });
