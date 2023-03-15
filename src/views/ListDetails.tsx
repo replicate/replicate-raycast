@@ -29,7 +29,6 @@ export const ListDetails = ({ isLoading, search, setSearch }: Props) => {
             detail={<List.Item.Detail markdown={markdown} />}
             actions={
               <ActionPanel>
-                <Action icon={Icon.SaveDocument} title="Save Image" onAction={() => saveImage(output[0])} />
                 <Action icon={Icon.Image} title="Copy Image" onAction={() => copyImage(src)} />
                 {prompt && <Action.CopyToClipboard icon={Icon.Text} title="Copy Prompt" content={prompt.trim()} />}
               </ActionPanel>
