@@ -5,10 +5,10 @@
   "$schema": "https://www.raycast.com/schemas/extension.json",
   "icon": "replicate.png",
   "owner": "replicate",
-  "author": "charlieholtz",
+  "author": "KevinBatdorf",
   "contributors": [
     "bfirsh",
-    "KevinBatdorf"
+    "charlieholtz"
   ],
   "categories": [
     "Media",
@@ -18,7 +18,7 @@
   "license": "MIT",
   "commands": [
     {
-      "name": "index",
+      "name": "replicate",
       "title": "Replicate",
       "subtitle": "Run models in the cloud",
       "description": "Run models in the cloud",
